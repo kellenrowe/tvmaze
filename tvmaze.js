@@ -8,27 +8,27 @@ const SUBSTITUTE_IMAGE = "https://tinyurl.com/tv-missing";
 const REQUEST_EPISODE_DATA = "http://api.tvmaze.com/shows/";
 
 
-  /** Given a search term, search for tv shows that match that query.
-   *
-   *  Returns (promise) array of show objects: [show, show, ...].
-   *    Each show object should contain exactly: {id, name, summary, image}
-   *    (if no image URL given by API, put in a default image URL)
-   */
+/** Given a search term, search for tv shows that match that query.
+ *
+ *  Returns (promise) array of show objects: [show, show, ...].
+ *    Each show object should contain exactly: {id, name, summary, image}
+ *    (if no image URL given by API, put in a default image URL)
+ */
 
-  async function getShowsByTerm(term) {
-    let showsInfo = [];
+async function getShowsByTerm(term) {
+  let showsInfo = [];
 
-    let response = await axios.get(REQUEST_API_URL, {
-      params: { q: term },
-    });
+  let response = await axios.get(REQUEST_API_URL, {
+    params: { q: term },
+  });
 
-    for (let show of response.data) {
-      let showInfo = { id: show.show.id, name: show.show.name, summary: show.show.summary, image: (show.show.image ? show.show.image.medium : SUBSTITUTE_IMAGE) };
-      showsInfo.push(showInfo);
-    }
-
-    return showsInfo;
+  for (let show of response.data) {
+    let showInfo = { id: show.show.id, name: show.show.name, summary: show.show.summary, image: (show.show.image ? show.show.image.medium : SUBSTITUTE_IMAGE) };
+    showsInfo.push(showInfo);
   }
+
+  return showsInfo;
+}
 
 /** Given list of shows, create markup for each and to DOM */
 
@@ -82,11 +82,11 @@ $searchForm.on("submit", async function (evt) {
  */
 
 async function getEpisodesOfShow(id) {
-  console.log('get episodes ran')
+  //console.log('get episodes ran')
   let episodes = [];
   let response = await axios.get(`${REQUEST_EPISODE_DATA}${id}/episodes`);
-  
-  for(let episode of response.data) {
+
+  for (let episode of response.data) {
     let episodeInfo = {
       id: episode.id,
       name: episode.name,
@@ -96,12 +96,12 @@ async function getEpisodesOfShow(id) {
     episodes.push(episodeInfo);
   }
   return episodes;
- }
+}
 
 /** Given list of , create markup for each and to DOM */
 
-async function populateEpisodes(episodes) { 
-  console.log('populate episodes ran');
+async function populateEpisodes(episodes) {
+  //console.log('populate episodes ran');
 
   for (let episode of episodes) {
     const $episode = $(
@@ -111,22 +111,25 @@ async function populateEpisodes(episodes) {
       </div>`
     );
     let listItem = $('<li>').append($episode);
-    $('#episodesList').appen(listItem);
+    $('#episodesList').append(listItem);
   }
 }
 
 /** Handle Episode button click: get episodes from API and display. */
 
 async function searchForEpisodesAndDisplay(evt) {
-  console.log('event handler ran');
-  let parent = evt.target.parentList()[0];
+  //console.log('event handler ran');
+  let parent = $(evt.target).closest('.Show');
   let $showId = $(parent).attr('data-show-id');
   let episodes = await getEpisodesOfShow($showId);
   populateEpisodes(episodes);
   $($episodesArea).show();
 }
 
-$('.Show-getEpisodes').on("click", async function(evt) {
-  await searchForEpisodesAndDisplay(evt);
+$('body').on("click", async function (evt) {
+  if (evt.target.innerText === 'Episodes') {
+    await searchForEpisodesAndDisplay(evt);
+  }
 });
+
 
